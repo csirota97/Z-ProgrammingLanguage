@@ -64,9 +64,9 @@ def runner(filename=None, direct_input=None):
                     variables_copy.pop(variable[0])
             variables = variables_copy.copy()
 
-        if 'slay' in line_words:
-            print(line_words)       
-            slay_index = line_words.index('slay')
+
+        while 'slay' in line_words:
+            slay_index = lastIndex(line_words, 'slay')
             function_not_found= False
             try:
                 function_to_call = functions[line_words[slay_index+1]]
@@ -91,7 +91,6 @@ def runner(filename=None, direct_input=None):
 
             line_words[slay_index: slay_index + 2 + len(function_to_call.parameterNames)] = [str(yeeted_value)]
 
-            print(line_words)
 
         if len(line_words) == 0:
             continue
@@ -233,6 +232,10 @@ def combine_strings(words, line, line_number):
  
     return replacement_words
 
+def lastIndex(list, word):
+    for index in range(len(list)-1,-1, -1):
+        if list[index] == word:
+            return index
 
 if __name__ == '__main__':
     runner()
