@@ -63,8 +63,9 @@ def runner(filename=None, direct_input=None):
                 if variable[1].callStackLevel == level_to_remove:
                     variables_copy.pop(variable[0])
             variables = variables_copy.copy()
-                
+
         if 'slay' in line_words:
+            print(line_words)       
             slay_index = line_words.index('slay')
             function_not_found= False
             try:
@@ -85,8 +86,12 @@ def runner(filename=None, direct_input=None):
             for index, name in enumerate(function_to_call.parameterNames):
                 variables[name] = Variable(name, line_words[slay_index+2+index], callStack[-1])
 
-            runner(direct_input=function_to_call.steps)
+            yeeted_value = runner(direct_input=function_to_call.steps)
             callStack.pop()
+
+            line_words[slay_index: slay_index + 2 + len(function_to_call.parameterNames)] = [str(yeeted_value)]
+
+            print(line_words)
 
         if len(line_words) == 0:
             continue
@@ -130,6 +135,12 @@ def runner(filename=None, direct_input=None):
                 Print to console
                 '''
                 print(process_value_from_code(line_words[1:], line_number, line))
+
+            elif line_words[0] == 'yeet':
+                '''
+                Return from function
+                '''
+                return process_value_from_code(line_words[1:], line_number, line)
 
 
 def is_number(string):
