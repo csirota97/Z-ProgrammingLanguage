@@ -7,9 +7,11 @@ based sum a b giving
     yeet a + b
 period
 
+based inputVal stan 5
+
 based factorial inputVal giving
     rizz? inputVal < 0 giving
-        big yikes "inputVal must be >= 0"
+        bigYikes "inputVal must be >= 0"
     period
     ratio? inputVal > 1 giving
         based nextVal stan inputVal - 1
