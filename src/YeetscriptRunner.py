@@ -1,10 +1,12 @@
-import BigYikes
-import Function
+from BigYikes import compilationYikes as BYCompilation, runtimeYikes as BYRuntime
+from Exceptions import OpenGiving, UnexpectedPeriod
 import sys
-import Variable
 import warnings
-import Yikes
+from Yikes import compilationYikes as YCompilation, runtimeYikes as YRuntime
 
+
+from Function import Function
+from Variable import Variable
 from YS_Keywords import keywords
 
 functions = {}
@@ -13,8 +15,9 @@ callStack = []
 
 code_lines = None
 
-def runner():
-    with open(sys.argv[1], 'r') as file:
+def runner(filename=None):
+    global code_lines, variables
+    with open(filename or sys.argv[1], 'r') as file:
         code_lines = file.readlines()
 
     giving_count = 0
@@ -27,9 +30,9 @@ def runner():
             period_count += 1
             
     if (giving_count > period_count):
-        BigYikes.compilationYikes("Open Giving-Period. Check for missing period(s).")
+        BYCompilation(OpenGiving, "Open Giving-Period. Check for missing period(s).")
     elif (giving_count < period_count):
-        BigYikes.compilationYikes("Unexpected period")
+        BYCompilation(UnexpectedPeriod, "Unexpected period")
 
     for line_index, line in enumerate(code_lines):
         line_words = line.strip().split()
@@ -37,18 +40,37 @@ def runner():
         if line_words == []:
             continue
 
+        if 'giving' in line_words:
+            callStack.append(len(callStack)+1)
+        if 'period' in line_words:
+            level_to_remove = callStack.pop()
+            variables_copy = variables.copy()
+            for variable in variables.items():
+                if variable[1].callStackLevel == level_to_remove:
+                    variables_copy.pop(variable[0])
+            variables = variables_copy.copy()
+                
+
         if line_words[0] in keywords:
             if line_words[0] == 'based' and line_words[2] == 'stan':
-                variables.append(Variable(line_words[1], line_number))
+                variables[line_words[1]] = Variable(line_words[1], process_value_from_code(line_words[3:], line_number), len(callStack))
+            if line_words[0] == 'spillTea':
+                print(process_value_from_code(line_words[1:], line_number))
 
 
-def isNumber(str):
+def is_number(string):
+    '''
+    Checks if string is a number
+    '''
     try:
-        return joined_words == str(int(joined_words)) or joined_words == str(float(joined_words))
+        return string == str(int(string)) or string == str(float(string))
     except ValueError:
         return False
 
-def processValueFromCode(words, line_number):
+def process_value_from_code(words, line_number):
+    '''
+    Process the value from the code
+    '''
     joined_words = "".join(words).strip()
     try:
         if (joined_words[0] == '"' and joined_words[-1] == '"') or (joined_words[0] == "'" and joined_words[-1] == "'"):
@@ -59,25 +81,28 @@ def processValueFromCode(words, line_number):
             return int(joined_words)
         return variables[joined_words].value
     except ValueError:
-        return variables[joined_words].value
+        try:
+            return variables[joined_words].value
+        except KeyError:
+            pass
     except KeyError:
         pass
 
 
-    if all(isNumber(word) or word in "+-/*()" for word in words):
-        return eval()
+    if all((is_number(word) or word in "+-/*()") for word in words):
+        return eval(" ".join(words))
 
     eval_words = []
     for word in words:
         try:
-            eval_words.push(variables[word].value)
+            eval_words.append(variables[word].value)
         except KeyError:
-            eval_words.push(word)
+            eval_words.append(word)
 
     try:
-        return eval(" ".join(eval_words))
+        return eval(" ".join([str(word) for word in eval_words]))
     except ValueError:
-        BigYikes.runtimeYikes("The following line could not be evaluated", " ".join(words), line_number)
+        BYRuntime("The following line could not be evaluated", " ".join(words), line_number)
 
 if __name__ == '__main__':
     runner()
