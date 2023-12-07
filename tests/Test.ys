@@ -1,0 +1,21 @@
+based helloWorld giving
+    spillTea "Hello World!"
+    yeet 0
+period
+
+based sum a b giving
+    yeet a + b
+period
+
+based factorial inputVal giving
+    rizz? inputVal < 0 giving
+        big yikes "inputVal must be >= 0"
+    period
+    ratio? inputVal > 1 giving
+        based nextVal stan inputVal - 1
+        yeet inputVal * slay factorial nextVal
+    period
+    ratio giving
+        yeet inputVal
+    period
+period
