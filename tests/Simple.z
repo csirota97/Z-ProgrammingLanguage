@@ -1,7 +1,18 @@
-giving
-based a stan 2
-based b stan 4
-spillTea a + b
-spillTea a * b
-spillTea b - a
+based simpleFunc giving
+    based a stan 2
+    based b stan 4
+    spillTea a + b
+    spillTea a * b
+    spillTea b - a
+    based c stan a + b
+    spillTea c
+    spillTea "Hello World"
 period
+
+
+based sum g h giving
+    spillTea g + h
+period
+
+slay simpleFunc
+slay sum 4 8
