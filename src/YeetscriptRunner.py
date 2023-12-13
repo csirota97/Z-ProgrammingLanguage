@@ -12,17 +12,22 @@ from YS_Keywords import keywords
 functions = {}
 variables = {}
 callStack = []
+rizzStack = []
 
 code_lines = None
 
-def runner(filename=None, direct_input=None):
-    if (direct_input == None):
-        global code_lines, variables
+def runner(filename=None, direct_input=None, new_variables=False):
+    if new_variables == False:
+        global variables
+    else:
+        variables = globals()['variables'].copy()
+
+    if direct_input == None:
+        global code_lines
 
         with open(filename or sys.argv[1], 'r') as file:
             code_lines = file.readlines()
     else:
-        global variables
         code_lines = direct_input
 
     giving_count = 0
@@ -40,6 +45,7 @@ def runner(filename=None, direct_input=None):
         BYCompilation(UnexpectedPeriod, "Unexpected period")
 
     next_line_to_process = None
+    ratiod = False
     for line_index, line in enumerate(code_lines):
         if next_line_to_process != None and next_line_to_process != line_index:
             continue
@@ -84,9 +90,23 @@ def runner(filename=None, direct_input=None):
 
             callStack.append(len(callStack)+1)
             for index, name in enumerate(function_to_call.parameterNames):
-                variables[name] = Variable(name, line_words[slay_index+2+index], callStack[-1])
+                try:
+                    variables[name] = Variable(name, variables[line_words[slay_index+2+index]].value, callStack[-1])
+                except KeyError:
+                    variables[name] = Variable(name, line_words[slay_index+2+index], callStack[-1])
 
-            yeeted_value = runner(direct_input=function_to_call.steps)
+            save_vars = variables.copy()
+            # print(list(save_vars.keys()))
+            # try:
+            #     print('VARIABLES 1', variables['inputVal'])
+            # except:
+            #     pass
+            yeeted_value = runner(direct_input=function_to_call.steps,new_variables=True)
+            variables = save_vars.copy()
+            # try:
+            #     print('VARIABLES 2', variables['inputVal'])
+            # except:
+            #     pass
             callStack.pop()
 
             line_words[slay_index: slay_index + 2 + len(function_to_call.parameterNames)] = [str(yeeted_value)]
@@ -139,7 +159,48 @@ def runner(filename=None, direct_input=None):
                 '''
                 Return from function
                 '''
+                # print(list(variables.keys()), variables['inputVal'])
                 return process_value_from_code(line_words[1:], line_number, line)
+            elif line_words[0] == 'rizz?':
+                '''
+                if?
+                '''
+                if process_value_from_code(line_words[1:], line_number, line):
+                    rizzStack.append(callStack[-1])
+                else:
+                    rizz_lines = code_lines[line_number-1:]
+                    rizz_call_indicator = 0
+                    for rizz_line_index, rizz_line in enumerate(rizz_lines):
+                        if "giving" in rizz_line:
+                            rizz_call_indicator += 1
+                        if "period" in rizz_line:
+                            rizz_call_indicator -= 1
+
+                        if rizz_call_indicator == 0:
+                            rizz_lines = rizz_lines[1:rizz_line_index]                        
+                            next_line_to_process = rizz_line_index + line_index
+                            break
+
+            elif line_words[0] == 'ratio?':
+                '''
+                else if?
+                '''
+                # print("RATIO:", process_value_from_code(line_words[1:], line_number, line))
+                if process_value_from_code(line_words[1:], line_number, line):
+                    rizzStack.append(callStack[-1])
+                else:
+                    rizz_lines = code_lines[line_number-1:]
+                    rizz_call_indicator = 0
+                    for rizz_line_index, rizz_line in enumerate(rizz_lines):
+                        if "giving" in rizz_line:
+                            rizz_call_indicator += 1
+                        if "period" in rizz_line:
+                            rizz_call_indicator -= 1
+
+                        if rizz_call_indicator == 0:
+                            rizz_lines = rizz_lines[1:rizz_line_index]
+                            next_line_to_process = rizz_line_index + line_index
+                            break
 
 
 def is_number(string):
@@ -155,6 +216,8 @@ def process_value_from_code(words, line_number, line):
     '''
     Process the value from the code
     '''
+    if 'giving' in words:
+        words.remove('giving')
     joined_words = "".join(combine_strings(words, line, line_number)).strip()
     if joined_words == "":
         return ""
@@ -174,7 +237,6 @@ def process_value_from_code(words, line_number, line):
     except KeyError:
         pass
 
-
     if all((is_number(word) or word in "+-/*()") for word in words):
         return eval(" ".join(words))
 
@@ -186,6 +248,9 @@ def process_value_from_code(words, line_number, line):
             eval_words.append(word)
 
     try:
+        # print(list(variables.keys()))
+        # for key in list(variables.keys()):
+        #     print(variables[key],end='\n\n-------------------------\n')
         return eval(" ".join([str(word) for word in eval_words]))
     except NameError:
         nameErr = True

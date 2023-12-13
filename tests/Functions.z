@@ -15,9 +15,27 @@ based factorial inputVal giving
     period
     ratio? inputVal > 1 giving
         based nextVal stan inputVal - 1
-        yeet inputVal * slay factorial nextVal
+        based new stan slay factorial nextVal
+        yeet new * inputVal
     period
-    ratio giving
+    ratio? inputVal == 1 giving
         yeet inputVal
     period
 period
+
+
+based max a b giving
+    rizz? a >= b giving
+        yeet a
+    period
+    yeet b
+period
+
+based eight stan 8
+
+spillTea slay max eight 5
+spillTea slay max 5 eight
+spillTea slay max 7 7
+
+~~ TODO: fix recursion variables overriding themselves -> 4*3*2*1*1 instead of 5*4*3*2*1
+spillTea slay factorial 5 ~~ should return 120, returns 24 (4!)

@@ -13,4 +13,7 @@ class Variable:
         self.value = value
         self.callStackLevel = callStackLevel
 
+    def __str__(self):
+        return f"NAME: {self.name}\nVALUE: {self.value}\nCALLSTACK_LEVEL: {self.callStackLevel}"
+
     
